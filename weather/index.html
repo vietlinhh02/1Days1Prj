@@ -10,64 +10,109 @@
     <div class="card">
         <div class="search">
             <input type="text" placeholder="Nhập thành phố của bạn" spellcheck="false">
-            <button><img src="/images/search.png" alt="Search"></button>
+            <button><img src="/weather/images/search.png" alt="Search"></button>
         </div>
-        <div class="weather">
-            <img src="/images/rain.png" class="weather-icon" alt="Weather Icon">
+        <div class="weather" style="display: none;">
+            <img src="/weather/images/rain.png" class="weather-icon" alt="Weather Icon">
             <h1 class="temp"><b>22°C</b></h1>
             <h2 class="city">Hà Nội</h2>
             <div class="details">
                 <div class="col">
-                    <img src="/images/humidity.png" alt="Humidity Icon">
+                    <img src="/weather/images/humidity.png" alt="Humidity Icon">
                     <div>
                         <p class="humidity">50%</p>
                         <p>Humidity</p>
                     </div>
                 </div>
                 <div class="col">
-                    <img src="/images/wind.png" alt="Wind Icon">
+                    <img src="/weather/images/wind.png" alt="Wind Icon">
                     <div>
                         <p class="wind">15 km/h</p>
                         <p>Wind Speed</p>
                     </div>
                 </div>
+                <!-- <div class="col">
+                    <img src="/weather/images/wind.png" alt="Wind Icon">
+                    <div>
+                        <p class="wind">15 km/h</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div> -->
             </div>
         </div>
     </div>
-    <script>
-        const apiKey = "de3ff96fdcc94a90b5b152604241705";
-        const apiUrl = "https://api.weatherapi.com/v1/current.json?";
-        const searchBox = document.querySelector('.search input');
-        const searchBtn = document.querySelector('.search button');
-        const weatherIcon = document.querySelector('.weather-icon');
-    
-        async function weather(city) {
-            try {
-                const response = await fetch(`${apiUrl}key=${apiKey}&q=${city}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                console.log(data);
-    
-                document.querySelector(".city").innerHTML = data.location.name;
-                document.querySelector(".temp").innerHTML = Math.round(data.current.temp_c) + "°C";
-                document.querySelector(".humidity").innerHTML = data.current.humidity + "%";
-                document.querySelector(".wind").innerHTML = data.current.wind_kph + " km/h";
-                weatherIcon.src = data.current.condition.icon;
-                weatherIcon.alt = data.current.condition.text;
-                document.querySelector(".weather").style.display = "block";
-            } catch (error) {
-                console.error('There was a problem with the fetch operation:', error);
-            }
-        }
-        
-        searchBtn.addEventListener("click", () => {
-            weather(searchBox.value);
-        });
 
-        
+    <!-- Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p>Vui lòng nhập lại tên thành phố.</p>
+        </div>
+    </div>
+
+    <script>
+// nhập apikey của bạn tại đây
+const apiKey = "";
+const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&";
+const searchBox = document.querySelector('.search input');
+const searchBtn = document.querySelector('.search button');
+const weatherIcon = document.querySelector('.weather-icon');
+const errorModal = document.getElementById('errorModal');
+const closeButton = document.querySelector('.close-button');
+
+const weatherIcons = {
+    "Clear": '/weather/images/clear.png',
+    "Clouds": '/weather/images/clouds.png',
+    "Humidity": '/weather/images/humidity.png',
+    "Drizzle": '/weather/images/drizzle.png',
+    "Mist": '/weather/images/mist.png',
+    "Rain": '/weather/images/rain.png',
+    "Snow": '/weather/images/snow.png',
+    "default": '/weather/images/wind.png'
+};
+
+async function weather(city) {
+    try {
+        const response = await fetch(`${apiUrl}q=${city}&appid=${apiKey}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        console.log(data);
+
+        document.querySelector(".city").innerHTML = data.name;
+        document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+        document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+        document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+
+        const weatherCondition = data.weather[0].main;
+        weatherIcon.src = weatherIcons[weatherCondition] || weatherIcons["default"];
+
+        document.querySelector(".weather").style.display = "block";
+    } catch (error) {
+        showErrorModal();
+    }
+}
+
+searchBtn.addEventListener("click", () => {
+    weather(searchBox.value);
+});
+
+function showErrorModal() {
+    errorModal.style.display = 'block';
+}
+
+closeButton.addEventListener('click', () => {
+    errorModal.style.display = 'none';
+});
+
+window.addEventListener('click', (event) => {
+    if (event.target === errorModal) {
+        errorModal.style.display = 'none';
+    }
+});
+
     </script>
-    
 </body>
 </html>
