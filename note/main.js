@@ -6,7 +6,7 @@ function addtask() {
     if ( inputBox.value == '') {
         alert('Nhap du lieu vao');
     } else {
-        let li = document.createElement('lli');
+        let li = document.createElement('li');
         li.innerHTML = inputBox.value;
         listContainer.appendChild(li);
         let span = document.createElement('span');
